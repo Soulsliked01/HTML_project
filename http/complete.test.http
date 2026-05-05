@@ -1,0 +1,1042 @@
+###
+# ============================================================
+# Games Manager — Full HTTP Test Battery
+# Ordre d'exécution : lancer dans l'ordre, les logins nommés
+# sont réutilisés via {{xxx_login.response.body.token}}
+# ============================================================
+
+@server = http://127.0.0.1:3000
+@adminuser = admin
+@adminpassword = admin
+@playeruser = player
+@playerpassword = player
+@refuser = ref
+@refpassword = ref
+@traineruser = trainer
+@trainerpassword = trainer
+
+
+# ============================================================
+# AUTH
+# ============================================================
+
+###
+# [OK 200] Login admin
+# @name admin_login
+POST {{server}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "{{adminuser}}",
+  "password": "{{adminpassword}}"
+}
+
+###
+# [OK 200] Login player
+# @name player_login
+POST {{server}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "{{playeruser}}",
+  "password": "{{playerpassword}}"
+}
+
+###
+# [OK 200] Login referee
+# @name ref_login
+POST {{server}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "{{refuser}}",
+  "password": "{{refpassword}}"
+}
+
+###
+# [OK 200] Login trainer
+# @name trainer_login
+POST {{server}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "{{traineruser}}",
+  "password": "{{trainerpassword}}"
+}
+
+###
+# [FAIL 400] Login — missing password
+POST {{server}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "admin"
+}
+
+###
+# [FAIL 400] Login — empty username
+POST {{server}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "",
+  "password": "admin"
+}
+
+###
+# [FAIL 401] Login — wrong password
+POST {{server}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "wrongpassword"
+}
+
+###
+# [FAIL 401] Login — unknown user
+POST {{server}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "ghost",
+  "password": "whatever"
+}
+
+
+# ============================================================
+# USERS — CREATE (public)
+# ============================================================
+
+###
+# [OK 201] Create user jane
+POST {{server}}/users HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "1234",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "username": "jane"
+}
+
+###
+# [FAIL 400] Email sans @
+POST {{server}}/users HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "janeexample.com",
+  "password": "superstrongpassword",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "username": "failing1"
+}
+
+###
+# [FAIL 400] Email sans .
+POST {{server}}/users HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "jane@examplecom",
+  "password": "superstrongpassword",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "username": "failing2"
+}
+
+###
+# [FAIL 400] DTO incomplet — pas de password
+POST {{server}}/users HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "firstName": "Jane",
+  "username": "failing3"
+}
+
+###
+# [FAIL 400] Username déjà pris
+POST {{server}}/users HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "jane2@example.com",
+  "password": "1234",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "username": "jane"
+}
+
+###
+# [FAIL 400] Email déjà pris
+POST {{server}}/users HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "1234",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "username": "jane_other"
+}
+
+###
+# [OK 200] Login jane
+# @name jane_login
+POST {{server}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "jane",
+  "password": "1234"
+}
+
+
+# ============================================================
+# USERS — READ
+# ============================================================
+
+###
+# [FAIL 401] GET /users — sans token
+GET {{server}}/users HTTP/1.1
+
+###
+# [OK 200] GET /users — admin reçoit UserDTO[]
+GET {{server}}/users HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [OK 200] GET /users — player reçoit UserShortDTO[]
+GET {{server}}/users HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 401] GET /users/:id — sans token
+GET {{server}}/users/1 HTTP/1.1
+
+###
+# [OK 200] GET /users/:id — admin voit UserDTO complet
+GET {{server}}/users/1 HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [OK 200] GET /users/:id — user voit son propre profil (UserDTO)
+GET {{server}}/users/2 HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [OK 200] GET /users/:id — user voit un autre profil (UserShortDTO)
+GET {{server}}/users/1 HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 404] GET /users/:id — user inexistant
+GET {{server}}/users/99999 HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [FAIL 401] GET /users/username/:username — sans token
+GET {{server}}/users/username/admin HTTP/1.1
+
+###
+# [OK 200] GET /users/username/:username — admin
+GET {{server}}/users/username/admin HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [OK 200] GET /users/username/:username — referee
+GET {{server}}/users/username/admin HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [FAIL 403] GET /users/username/:username — player interdit
+GET {{server}}/users/username/admin HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 403] GET /users/username/:username — trainer interdit
+GET {{server}}/users/username/admin HTTP/1.1
+Authorization: {{trainer_login.response.body.token}}
+
+###
+# [FAIL 404] GET /users/username/:username — username inexistant
+GET {{server}}/users/username/ghostuser HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [FAIL 401] GET /users/email/:email — sans token
+GET {{server}}/users/email/admin@vinci.be HTTP/1.1
+
+###
+# [OK 200] GET /users/email/:email — admin
+GET {{server}}/users/email/admin@vinci.be HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [OK 200] GET /users/email/:email — referee
+GET {{server}}/users/email/admin@vinci.be HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [FAIL 403] GET /users/email/:email — player interdit
+GET {{server}}/users/email/admin@vinci.be HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 404] GET /users/email/:email — email inexistant
+GET {{server}}/users/email/nobody@nowhere.com HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+
+# ============================================================
+# USERS — UPDATE
+# ============================================================
+
+###
+# [FAIL 401] PUT /users/:id — sans token
+PUT {{server}}/users/2 HTTP/1.1
+Content-Type: application/json
+
+{
+  "id": 2,
+  "email": "modified@vinci.be",
+  "firstName": "Modified",
+  "lastName": "User",
+  "username": "newplayer",
+  "role": "player",
+  "status": "active"
+}
+
+###
+# [FAIL 400] PUT /users/:id — body.id != path.id
+PUT {{server}}/users/1 HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+Content-Type: application/json
+
+{
+  "id": 2,
+  "email": "modified@vinci.be",
+  "firstName": "Modified",
+  "lastName": "User",
+  "username": "newplayer",
+  "role": "player",
+  "status": "active"
+}
+
+###
+# [FAIL 403] PUT /users/:id — player modifie un autre user
+PUT {{server}}/users/1 HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+Content-Type: application/json
+
+{
+  "id": 1,
+  "email": "hacked@vinci.be",
+  "firstName": "Hacked",
+  "lastName": "Admin",
+  "username": "hacked",
+  "role": "admin",
+  "status": "active"
+}
+
+###
+# [OK 200] PUT /users/:id — player modifie son propre profil
+# role et status ignorés server-side
+PUT {{server}}/users/2 HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+Content-Type: application/json
+
+{
+  "id": 2,
+  "email": "player@vinci.be",
+  "firstName": "Player",
+  "lastName": "Updated",
+  "username": "player",
+  "role": "admin",
+  "status": "inactive"
+}
+
+###
+# [FAIL 404] PUT /users/:id — user inexistant
+PUT {{server}}/users/99999 HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+Content-Type: application/json
+
+{
+  "id": 99999,
+  "email": "ghost@vinci.be",
+  "firstName": "Ghost",
+  "lastName": "User",
+  "username": "ghost",
+  "role": "player",
+  "status": "active"
+}
+
+###
+# [OK 200] PUT /users/:id — admin modifie n'importe quel user
+PUT {{server}}/users/2 HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+Content-Type: application/json
+
+{
+  "id": 2,
+  "email": "player@vinci.be",
+  "firstName": "player",
+  "lastName": "player",
+  "username": "player",
+  "role": "player",
+  "status": "active"
+}
+
+
+# ============================================================
+# USERS — ROLE
+# ============================================================
+
+###
+# [FAIL 401] PATCH /users/:id/role/:role — sans token
+PATCH {{server}}/users/2/role/referee HTTP/1.1
+
+###
+# [FAIL 403] PATCH /users/:id/role/:role — player interdit
+PATCH {{server}}/users/2/role/trainer HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 400] PATCH /users/:id/role/:role — role invalide
+PATCH {{server}}/users/2/role/superadmin HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [FAIL 400] PATCH /users/:id/role/:role — target n'est pas player (ref=id3)
+PATCH {{server}}/users/3/role/admin HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [FAIL 404] PATCH /users/:id/role/:role — user inexistant
+PATCH {{server}}/users/99999/role/referee HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [OK 200] PATCH /users/:id/role/:role — admin change le role de jane (player → referee)
+PATCH {{server}}/users/5/role/referee HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+
+# ============================================================
+# USERS — DELETE (soft)
+# ============================================================
+
+###
+# [FAIL 401] DELETE /users/:id — sans token
+DELETE {{server}}/users/5 HTTP/1.1
+
+###
+# [FAIL 403] DELETE /users/:id — player supprime un autre
+DELETE {{server}}/users/5 HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 400] DELETE /users/:id — tentative de supprimer admin
+DELETE {{server}}/users/1 HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [FAIL 404] DELETE /users/:id — user inexistant
+DELETE {{server}}/users/99999 HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [OK 200] DELETE /users/:id — admin supprime jane (soft-delete)
+DELETE {{server}}/users/5 HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+
+# ============================================================
+# USERS — REACTIVATE
+# ============================================================
+
+###
+# [FAIL 401] PATCH /users/:id/reactivate — sans token
+PATCH {{server}}/users/5/reactivate HTTP/1.1
+
+###
+# [FAIL 403] PATCH /users/:id/reactivate — referee interdit
+PATCH {{server}}/users/5/reactivate HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [FAIL 404] PATCH /users/:id/reactivate — user inexistant
+PATCH {{server}}/users/99999/reactivate HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+###
+# [OK 200] PATCH /users/:id/reactivate — admin réactive jane
+PATCH {{server}}/users/5/reactivate HTTP/1.1
+Authorization: {{admin_login.response.body.token}}
+
+
+# ============================================================
+# FIELDS
+# ============================================================
+
+###
+# [OK 200] GET /fields — public
+GET {{server}}/fields HTTP/1.1
+
+###
+# [FAIL 400] GET /fields/:id — id invalide
+GET {{server}}/fields/abc HTTP/1.1
+
+###
+# [FAIL 404] GET /fields/:id — field inexistant
+GET {{server}}/fields/99999 HTTP/1.1
+
+###
+# [OK 200] GET /fields/:id
+GET {{server}}/fields/1 HTTP/1.1
+
+###
+# [FAIL 401] POST /fields — sans token
+POST {{server}}/fields HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Terrain A",
+  "location": "Bruxelles"
+}
+
+###
+# [FAIL 403] POST /fields — player interdit
+POST {{server}}/fields HTTP/1.1
+Content-Type: application/json
+Authorization: {{player_login.response.body.token}}
+
+{
+  "name": "Terrain A",
+  "location": "Bruxelles"
+}
+
+###
+# [FAIL 400] POST /fields — champs manquants
+POST {{server}}/fields HTTP/1.1
+Content-Type: application/json
+Authorization: {{admin_login.response.body.token}}
+
+{
+  "name": "Terrain sans location"
+}
+
+###
+# [OK 201] POST /fields — admin crée un terrain
+POST {{server}}/fields HTTP/1.1
+Content-Type: application/json
+Authorization: {{admin_login.response.body.token}}
+
+{
+  "name": "Terrain Test",
+  "location": "Rue du Stade 1, Bruxelles"
+}
+
+###
+# [FAIL 401] PUT /fields/:id — sans token
+PUT {{server}}/fields/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Terrain Modifié",
+  "location": "Nouveau lieu"
+}
+
+###
+# [FAIL 403] PUT /fields/:id — referee interdit
+PUT {{server}}/fields/1 HTTP/1.1
+Content-Type: application/json
+Authorization: {{ref_login.response.body.token}}
+
+{
+  "id": 1,
+  "name": "Terrain Modifié",
+  "location": "Nouveau lieu"
+}
+
+###
+# [FAIL 400] PUT /fields/:id — body.id != path.id
+PUT {{server}}/fields/1 HTTP/1.1
+Content-Type: application/json
+Authorization: {{admin_login.response.body.token}}
+
+{
+  "id": 99,
+  "name": "Terrain Modifié",
+  "location": "Nouveau lieu"
+}
+
+###
+# [FAIL 404] PUT /fields/:id — field inexistant
+PUT {{server}}/fields/99999 HTTP/1.1
+Content-Type: application/json
+Authorization: {{admin_login.response.body.token}}
+
+{
+  "id": 99999,
+  "name": "Terrain Fantôme",
+  "location": "Nulle part"
+}
+
+###
+# [OK 200] PUT /fields/:id — admin modifie un terrain
+PUT {{server}}/fields/1 HTTP/1.1
+Content-Type: application/json
+Authorization: {{admin_login.response.body.token}}
+
+{
+  "id": 1,
+  "name": "Terrain Principal",
+  "location": "Avenue du Sport 42, Bruxelles"
+}
+
+
+# ============================================================
+# TEAMS
+# ============================================================
+
+###
+# [OK 200] GET /teams — public
+GET {{server}}/teams HTTP/1.1
+
+###
+# [FAIL 400] GET /teams/:id — id invalide
+GET {{server}}/teams/abc HTTP/1.1
+
+###
+# [FAIL 404] GET /teams/:id — team inexistante
+GET {{server}}/teams/99999 HTTP/1.1
+
+###
+# [OK 200] GET /teams/:id — public
+GET {{server}}/teams/1 HTTP/1.1
+
+###
+# [FAIL 401] GET /teams/own — sans token
+GET {{server}}/teams/own HTTP/1.1
+
+###
+# [OK 200] GET /teams/own — player
+GET {{server}}/teams/own HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [OK 200] GET /teams/own — trainer
+GET {{server}}/teams/own HTTP/1.1
+Authorization: {{trainer_login.response.body.token}}
+
+###
+# [FAIL 401] POST /teams — sans token
+POST {{server}}/teams HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "New Team",
+  "sportType": "football"
+}
+
+###
+# [FAIL 403] POST /teams — player interdit
+POST {{server}}/teams HTTP/1.1
+Content-Type: application/json
+Authorization: {{player_login.response.body.token}}
+
+{
+  "name": "New Team",
+  "sportType": "football"
+}
+
+###
+# [FAIL 403] POST /teams — referee interdit
+POST {{server}}/teams HTTP/1.1
+Content-Type: application/json
+Authorization: {{ref_login.response.body.token}}
+
+{
+  "name": "New Team",
+  "sportType": "football"
+}
+
+###
+# [FAIL 400] POST /teams — DTO incomplet (pas de name)
+POST {{server}}/teams HTTP/1.1
+Content-Type: application/json
+Authorization: {{trainer_login.response.body.token}}
+
+{
+  "sportType": "basketball"
+}
+
+###
+# [FAIL 400] POST /teams — sport invalide
+POST {{server}}/teams HTTP/1.1
+Content-Type: application/json
+Authorization: {{trainer_login.response.body.token}}
+
+{
+  "name": "Hockey Team",
+  "sportType": "water_polo"
+}
+
+###
+# [OK 201] POST /teams — trainer crée avec description
+POST {{server}}/teams HTTP/1.1
+Content-Type: application/json
+Authorization: {{trainer_login.response.body.token}}
+
+{
+  "name": "Dream Team",
+  "description": "La meilleure équipe",
+  "sportType": "football"
+}
+
+###
+# [OK 201] POST /teams — trainer crée sans description
+POST {{server}}/teams HTTP/1.1
+Content-Type: application/json
+Authorization: {{trainer_login.response.body.token}}
+
+{
+  "name": "Unnamed Squad",
+  "sportType": "basketball"
+}
+
+###
+# [FAIL 401] PUT /teams/:id — sans token
+PUT {{server}}/teams/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Modified",
+  "sportType": "football",
+  "players": [],
+  "trainerId": 4
+}
+
+###
+# [FAIL 403] PUT /teams/:id — player interdit
+PUT {{server}}/teams/1 HTTP/1.1
+Content-Type: application/json
+Authorization: {{player_login.response.body.token}}
+
+{
+  "id": 1,
+  "name": "Modified",
+  "sportType": "football",
+  "players": [],
+  "trainerId": 4
+}
+
+###
+# [FAIL 400] PUT /teams/:id — body.id != path.id
+PUT {{server}}/teams/1 HTTP/1.1
+Content-Type: application/json
+Authorization: {{trainer_login.response.body.token}}
+
+{
+  "id": 99,
+  "name": "Modified",
+  "sportType": "football",
+  "players": [],
+  "trainerId": 4
+}
+
+###
+# [FAIL 400] PUT /teams/:id — players manquant
+PUT {{server}}/teams/1 HTTP/1.1
+Content-Type: application/json
+Authorization: {{trainer_login.response.body.token}}
+
+{
+  "id": 1,
+  "name": "Modified",
+  "sportType": "football",
+  "trainerId": 4
+}
+
+###
+# [OK 200] PUT /teams/:id — trainer modifie
+PUT {{server}}/teams/1 HTTP/1.1
+Content-Type: application/json
+Authorization: {{trainer_login.response.body.token}}
+
+{
+  "id": 1,
+  "name": "Red Dragons FC",
+  "description": "Updated description",
+  "sportType": "football",
+  "players": [2, 3],
+  "trainerId": 4
+}
+
+###
+# [FAIL 401] PATCH /teams/:id/join — sans token
+PATCH {{server}}/teams/1/join HTTP/1.1
+
+###
+# [FAIL 404] PATCH /teams/:id/join — team inexistante
+PATCH {{server}}/teams/99999/join HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [OK 200] PATCH /teams/:id/join — player rejoint team 1
+PATCH {{server}}/teams/1/join HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 400] PATCH /teams/:id/join — déjà membre
+PATCH {{server}}/teams/1/join HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 401] PATCH /teams/:id/leave — sans token
+PATCH {{server}}/teams/1/leave HTTP/1.1
+
+###
+# [OK 200] PATCH /teams/:id/leave — player quitte team 1
+PATCH {{server}}/teams/1/leave HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 404] PATCH /teams/:id/leave — pas dans la team
+PATCH {{server}}/teams/1/leave HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 404] PATCH /teams/:id/leave — team inexistante
+PATCH {{server}}/teams/99999/leave HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+
+# ============================================================
+# GAMES
+# ============================================================
+
+###
+# [OK 200] GET /games — public, upcoming seulement
+GET {{server}}/games HTTP/1.1
+
+###
+# [FAIL 400] GET /games/:id — id invalide
+GET {{server}}/games/abc HTTP/1.1
+
+###
+# [FAIL 404] GET /games/:id — game inexistante
+GET {{server}}/games/99999 HTTP/1.1
+
+###
+# [OK 200] GET /games/:id — public
+GET {{server}}/games/1 HTTP/1.1
+
+###
+# [FAIL 401] POST /games — sans token
+POST {{server}}/games HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Test Game",
+  "homeTeamId": 1,
+  "awayTeamId": 2
+}
+
+###
+# [FAIL 403] POST /games — player interdit
+POST {{server}}/games HTTP/1.1
+Content-Type: application/json
+Authorization: {{player_login.response.body.token}}
+
+{
+  "name": "Test Game",
+  "homeTeamId": 1,
+  "awayTeamId": 2
+}
+
+###
+# [FAIL 403] POST /games — trainer interdit
+POST {{server}}/games HTTP/1.1
+Content-Type: application/json
+Authorization: {{trainer_login.response.body.token}}
+
+{
+  "name": "Test Game",
+  "homeTeamId": 1,
+  "awayTeamId": 2
+}
+
+###
+# [OK 201] POST /games — referee, status=created
+# @name game_created
+POST {{server}}/games HTTP/1.1
+Content-Type: application/json
+Authorization: {{ref_login.response.body.token}}
+
+{
+  "name": "Red Dragons vs Blue Eagles",
+  "homeTeamId": 1,
+  "awayTeamId": 2
+}
+
+###
+# [OK 201] POST /games — referee, status=scheduled (field+date)
+# @name game_scheduled
+POST {{server}}/games HTTP/1.1
+Content-Type: application/json
+Authorization: {{ref_login.response.body.token}}
+
+{
+  "name": "Final Match",
+  "homeTeamId": 1,
+  "awayTeamId": 2,
+  "fieldId": 1,
+  "scheduledDate": "2099-12-01T14:00:00.000Z"
+}
+
+###
+# [FAIL 401] PUT /games/:id — sans token
+PUT {{server}}/games/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Updated"
+}
+
+###
+# [FAIL 403] PUT /games/:id — player interdit
+PUT {{server}}/games/1 HTTP/1.1
+Content-Type: application/json
+Authorization: {{player_login.response.body.token}}
+
+{
+  "id": 1,
+  "name": "Updated"
+}
+
+###
+# [FAIL 400] PUT /games/:id — body.id != path.id
+PUT {{server}}/games/1 HTTP/1.1
+Content-Type: application/json
+Authorization: {{ref_login.response.body.token}}
+
+{
+  "id": 99,
+  "name": "Updated"
+}
+
+###
+# [FAIL 404] PUT /games/:id — game inexistante
+PUT {{server}}/games/99999 HTTP/1.1
+Content-Type: application/json
+Authorization: {{ref_login.response.body.token}}
+
+{
+  "id": 99999,
+  "name": "Ghost Game"
+}
+
+###
+# [OK 200] PUT /games/:id — referee modifie (ajoute field+date => scheduled)
+PUT {{server}}/games/1 HTTP/1.1
+Content-Type: application/json
+Authorization: {{ref_login.response.body.token}}
+
+{
+  "id": 1,
+  "name": "Red Dragons vs Blue Eagles — Updated",
+  "homeTeamId": 1,
+  "awayTeamId": 2,
+  "fieldId": 1,
+  "scheduledDate": "2099-06-15T14:00:00.000Z"
+}
+
+###
+# [FAIL 401] PATCH /games/:id/status — player interdit
+PATCH {{server}}/games/1/status/started HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [FAIL 400] PATCH /games/:id/status — status invalide
+PATCH {{server}}/games/1/status/flying HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [FAIL 400] PATCH /games/:id/status/started — game pas scheduled (game 1 = created)
+PATCH {{server}}/games/1/status/started HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [OK 200] PATCH /games/:id/status/cancelled — created → cancelled
+PATCH {{server}}/games/1/status/cancelled HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [FAIL 400] PATCH /games/:id/status — transition invalide (cancelled → started)
+PATCH {{server}}/games/1/status/started HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [OK 200] PATCH /games/:id/status/started — scheduled → started (game 2)
+PATCH {{server}}/games/2/status/started HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [FAIL 403] PATCH /games/:id/score — player interdit
+PATCH {{server}}/games/2/score/2/1 HTTP/1.1
+Authorization: {{player_login.response.body.token}}
+
+###
+# [OK 200] PATCH /games/:id/score — referee set le score
+PATCH {{server}}/games/2/score/3/1 HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [FAIL 400] PATCH /games/:id/score — game pas started (game 1 = cancelled)
+PATCH {{server}}/games/1/score/1/0 HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [OK 200] PATCH /games/:id/status/finished — started → finished
+PATCH {{server}}/games/2/status/finished HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [FAIL 400] PATCH /games/:id/status — finished → cancelled (interdit)
+PATCH {{server}}/games/2/status/cancelled HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [FAIL 400] PUT /games/:id — game finished ne peut pas être modifiée
+PUT {{server}}/games/2 HTTP/1.1
+Content-Type: application/json
+Authorization: {{ref_login.response.body.token}}
+
+{
+  "id": 2,
+  "name": "Cannot update finished game"
+}
+
+###
+# [FAIL 403] DELETE /games/:id — referee interdit
+DELETE {{server}}/games/2 HTTP/1.1
+Authorization: {{ref_login.response.body.token}}
+
+###
+# [FAIL 401] DELETE /games/:id — sans token
+DELETE {{server}}/games/2 HTTP/1.1
+
+###
+# [OK 204] DELETE /games/:id — admin hard delete
+DELETE {{server}}/games/2 HTTP/1.1
+Authorization: {{admin_login.response.body.token}}

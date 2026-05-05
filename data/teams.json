@@ -1,0 +1,119 @@
+[
+  {
+    "id": 1,
+    "name": "Football Club Bruxelles",
+    "description": "A competitive football team",
+    "players": [
+      2,
+      3
+    ],
+    "trainer_id": 4,
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 2,
+    "name": "Basket Club Bruxelles",
+    "description": "A rising basketball team",
+    "players": [
+      4
+    ],
+    "trainer_id": 5,
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 3,
+    "name": "Football Club Mons",
+    "description": "A not so competitive football team",
+    "players": [
+      2,
+      3
+    ],
+    "trainer_id": 4,
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 4,
+    "name": "Basket Club Mons",
+    "description": "A rising basketball team",
+    "players": [
+      2,
+      3
+    ],
+    "trainer_id": 4,
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 5,
+    "name": "Football Club Bruxelles",
+    "description": "A nice team",
+    "sportType": "football",
+    "players": [],
+    "trainer_id": 4,
+    "created_at": "2026-05-05T07:37:51.787Z",
+    "updated_at": "2026-05-05T07:37:51.787Z"
+  },
+  {
+    "id": 6,
+    "name": "Football Club Mons",
+    "description": "A not so competitive football team",
+    "sportType": "football",
+    "players": [],
+    "trainer_id": 4,
+    "created_at": "2026-05-05T07:37:54.385Z",
+    "updated_at": "2026-05-05T07:37:54.385Z"
+  },
+  {
+    "id": 7,
+    "name": "Tennis Club Bruxelles",
+    "description": "A nice tennis team",
+    "sportType": "tennis",
+    "players": [],
+    "trainer_id": 4,
+    "created_at": "2026-05-05T07:37:56.401Z",
+    "updated_at": "2026-05-05T07:37:56.401Z"
+  },
+  {
+    "id": 8,
+    "name": "Tennis Club Mons",
+    "description": "A rising tennis team",
+    "sportType": "tennis",
+    "players": [],
+    "trainer_id": 4,
+    "created_at": "2026-05-05T07:37:59.112Z",
+    "updated_at": "2026-05-05T07:37:59.112Z"
+  },
+  {
+    "id": 9,
+    "name": "Basket Club Bruxelles",
+    "description": "A nice basketball team",
+    "sportType": "basketball",
+    "players": [],
+    "trainer_id": 4,
+    "created_at": "2026-05-05T07:38:00.871Z",
+    "updated_at": "2026-05-05T07:38:00.871Z"
+  },
+  {
+    "id": 10,
+    "name": "Basket Club Mons",
+    "description": "A rising basketball team",
+    "sportType": "basketball",
+    "players": [],
+    "trainer_id": 4,
+    "created_at": "2026-05-05T07:38:03.110Z",
+    "updated_at": "2026-05-05T07:38:03.110Z"
+  },
+  {
+    "id": 11,
+    "name": "Basket Club Mons",
+    "description": "A rising basketball team",
+    "sportType": "basketball",
+    "players": [],
+    "trainer_id": 4,
+    "created_at": "2026-05-05T07:38:05.591Z",
+    "updated_at": "2026-05-05T07:38:05.591Z"
+  }
+]

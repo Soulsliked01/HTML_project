@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "first_name": "Admin",
+    "last_name": "player",
+    "email": "admin@vinci.be",
+    "username": "admin",
+    "password": "$2b$10$iFpzJo06cqdHJ2ed1.UG6uN1Xla77YouZmXZZPDTsxltlNo020hBi",
+    "role": "admin",
+    "status": "active",
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 2,
+    "first_name": "player",
+    "last_name": "player",
+    "email": "player@vinci.be",
+    "username": "player",
+    "password": "$2b$10$LqQNFCnQD2KSFU9M8QFLw.R2tMZTkTjgNOVXUW.REkJC1sQ7HvEyG",
+    "role": "player",
+    "status": "active",
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 3,
+    "first_name": "Bob",
+    "last_name": "Jones",
+    "email": "bob@example.com",
+    "username": "bob",
+    "password": "$2b$10$LqQNFCnQD2KSFU9M8QFLw.R2tMZTkTjgNOVXUW.REkJC1sQ7HvEyG",
+    "role": "referee",
+    "status": "active",
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-05-05T07:38:33.230Z"
+  },
+  {
+    "id": 4,
+    "first_name": "trainer",
+    "last_name": "trainer",
+    "email": "trainer@vinci.be",
+    "username": "trainer",
+    "password": "$2b$10$Rl8RG8VKS/EZ4tEn/z1S/.FIRb6cvfWwktdaumCe.x3Kx0mYGfk4S",
+    "role": "trainer",
+    "status": "active",
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 5,
+    "first_name": "Alice",
+    "last_name": "Trainer",
+    "email": "trainer2@vinci.be",
+    "username": "alice",
+    "password": "$2b$10$Rl8RG8VKS/EZ4tEn/z1S/.FIRb6cvfWwktdaumCe.x3Kx0mYGfk4S",
+    "role": "trainer",
+    "status": "active",
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 6,
+    "first_name": "Yassin",
+    "last_name": "Trainer",
+    "email": "trainer3@vinci.be",
+    "username": "yassin",
+    "password": "$2b$10$Rl8RG8VKS/EZ4tEn/z1S/.FIRb6cvfWwktdaumCe.x3Kx0mYGfk4S",
+    "role": "trainer",
+    "status": "active",
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 7,
+    "first_name": "ref",
+    "last_name": "ref",
+    "email": "ref@vinci.be",
+    "username": "ref",
+    "password": "$2b$10$KbPgepth0R8or9warCPe0ezuGtrXuQ6qF20MgU1kkQJI4ZtDkgyjC",
+    "role": "referee",
+    "status": "active",
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 8,
+    "first_name": "Inactive",
+    "last_name": "player",
+    "email": "inactive@example.com",
+    "username": "inactive",
+    "password": "$2b$10$O7ibWTJD4O.bD.e1yuHxYecHxJZtUZtweLmSR4wOlsdBte07LzJuG",
+    "role": "player",
+    "status": "inactive",
+    "created_at": "2026-04-09T08:08:31.268Z",
+    "updated_at": "2026-04-09T08:08:31.268Z"
+  },
+  {
+    "id": 9,
+    "first_name": "Good",
+    "last_name": "Player",
+    "email": "iamagoodplayer@vinci.be",
+    "username": "iamagoodplayer",
+    "password": "superstrongpassword1234",
+    "role": "player",
+    "status": "active",
+    "created_at": "2026-05-05T07:39:12.286Z",
+    "updated_at": "2026-05-05T07:39:12.286Z"
+  },
+  {
+    "id": 10,
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "email": "jane@example.com",
+    "username": "jane",
+    "password": "1234",
+    "role": "player",
+    "status": "active",
+    "created_at": "2026-05-05T07:46:03.523Z",
+    "updated_at": "2026-05-05T07:46:03.523Z"
+  }
+]
